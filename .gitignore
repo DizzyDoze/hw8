@@ -11,5 +11,3 @@ packer_cache/
 # os
 .DS_Store
 
-# pdf export
-*.pdf
