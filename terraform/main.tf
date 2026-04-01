@@ -38,7 +38,7 @@ resource "aws_security_group" "bastion" {
   }
 }
 
-# private sg: only allow ssh from bastion
+# private sg: allow ssh from bastion, node exporter from monitoring
 resource "aws_security_group" "private" {
   name   = "hw8-private-sg"
   vpc_id = module.vpc.vpc_id
@@ -48,6 +48,58 @@ resource "aws_security_group" "private" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
+  }
+
+  # allow prometheus to scrape node exporter
+  ingress {
+    from_port       = 9100
+    to_port         = 9100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.monitoring.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# monitoring sg: ssh from bastion, prometheus and grafana from vpc
+resource "aws_security_group" "monitoring" {
+  name   = "hw8-monitoring-sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion.id]
+  }
+
+  # prometheus ui
+  ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  # grafana ui
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  # node exporter on monitoring instance itself
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   egress {

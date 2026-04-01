@@ -17,7 +17,7 @@ variable "ssh_public_key" {
 
 # base image and instance config
 source "amazon-ebs" "amazon-linux" {
-  ami_name      = "custom-docker-ami-{{timestamp}}"
+  ami_name      = "custom-docker-monitoring-ami-{{timestamp}}"
   instance_type = "t2.micro"
   region        = "us-west-2"
   ssh_username  = "ec2-user"
@@ -45,6 +45,20 @@ build {
       "sudo systemctl enable docker",
       "sudo systemctl start docker",
       "sudo usermod -aG docker ec2-user"
+    ]
+  }
+
+  # install node exporter for prometheus metrics
+  provisioner "shell" {
+    inline = [
+      "wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz",
+      "tar xzf node_exporter-1.8.2.linux-amd64.tar.gz",
+      "sudo mv node_exporter-1.8.2.linux-amd64/node_exporter /usr/local/bin/",
+      "rm -rf node_exporter-1.8.2.linux-amd64*",
+      "sudo useradd --no-create-home --shell /bin/false node_exporter",
+      "sudo tee /etc/systemd/system/node_exporter.service > /dev/null <<'EOF'\n[Unit]\nDescription=Node Exporter\nAfter=network.target\n\n[Service]\nUser=node_exporter\nExecStart=/usr/local/bin/node_exporter\n\n[Install]\nWantedBy=multi-user.target\nEOF",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable node_exporter"
     ]
   }
 
