@@ -102,10 +102,10 @@ Then open http://localhost:3000 in your browser.
 ## Screenshots
 
 ### Prometheus Targets
-![Prometheus Targets](screenshots/prometheus-targets.png)
+-> refer to the h9.pdf
 
 ### Grafana Dashboard
-![Grafana Dashboard](screenshots/grafana-dashboard.png)
+-> refer to the h9.pdf
 
 ## Tear Down
 
