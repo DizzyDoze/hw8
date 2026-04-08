@@ -74,6 +74,22 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+
 # bastion host in public subnet
 resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.amazon_linux.id
@@ -86,14 +102,44 @@ resource "aws_instance" "bastion" {
   tags = { Name = "hw8-bastion" }
 }
 
-# 6 private ec2 instances using custom packer ami
-resource "aws_instance" "private" {
-  count                  = 6
-  ami                    = var.ami_id
+# 3 Amazon Linux EC2 instances (private subnet)
+resource "aws_instance" "private_amazon" {
+  count                  = 3
+  ami                    = data.aws_ami.amazon_linux.id
   instance_type          = "t2.micro"
   subnet_id              = module.vpc.private_subnet_ids[count.index % length(module.vpc.private_subnet_ids)]
   vpc_security_group_ids = [aws_security_group.private.id]
   key_name               = aws_key_pair.deployer.key_name
 
-  tags = { Name = "hw8-private-${count.index}" }
+  tags = {
+    Name = "hw11-amazon-${count.index}"
+    OS   = "amazon"
+  }
+}
+
+# 3 Ubuntu EC2 instances (private subnet)
+resource "aws_instance" "private_ubuntu" {
+  count                  = 3
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc.private_subnet_ids[count.index % length(module.vpc.private_subnet_ids)]
+  vpc_security_group_ids = [aws_security_group.private.id]
+  key_name               = aws_key_pair.deployer.key_name
+
+  tags = {
+    Name = "hw11-ubuntu-${count.index}"
+    OS   = "ubuntu"
+  }
+}
+
+# Ansible Controller (public subnet)
+resource "aws_instance" "ansible_controller" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = "t2.micro"
+  subnet_id                   = module.vpc.public_subnet_ids[1]
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
+  key_name                    = aws_key_pair.deployer.key_name
+  associate_public_ip_address = true
+
+  tags = { Name = "hw11-ansible-controller" }
 }
