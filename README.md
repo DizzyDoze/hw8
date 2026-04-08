@@ -60,11 +60,10 @@ sudo dnf install -y ansible
 <img width="1250" height="658" alt="Screenshot 2026-04-07 at 11 17 12 PM" src="https://github.com/user-attachments/assets/f95dfca2-1fe0-4336-b9fc-1051836add63" />
 
 
-Copy your SSH private key to the controller (from your local machine):
+Forward the Key and jump to the private subnet:
 
 ```bash
-scp -i ~/.ssh/id_ed25519 ~/.ssh/id_ed25519 ec2-user@<ansible_controller_public_ip>:~/.ssh/id_ed25519
-chmod 600 ~/.ssh/id_ed25519   # run this on the controller
+ssh -A -i ~/.ssh/id_ed25519 ec2-user@<ansible_controller_public_ip> 
 ```
 
 ## 3. Update the Inventory
@@ -93,6 +92,9 @@ Copy `ansible/playbook.yml` to the controller:
 ```bash
 scp -i ~/.ssh/id_ed25519 ansible/playbook.yml ansible/inventory.ini ec2-user@<ansible_controller_public_ip>:~/
 ```
+<img width="1249" height="77" alt="Screenshot 2026-04-07 at 11 17 47 PM" src="https://github.com/user-attachments/assets/9fea20a2-7e69-4586-aa96-7bdfdb43fe0c" />
+
+
 Then run:
 ```bash
 ansible-playbook -i inventory.ini playbook.yml
