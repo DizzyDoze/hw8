@@ -87,8 +87,11 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 ## 4. Run the Playbook
 
-Copy `ansible/playbook.yml` to the controller and run:
-
+Copy `ansible/playbook.yml` to the controller:
+```bash
+scp -i ~/.ssh/id_ed25519 ansible/playbook.yml ansible/inventory.ini ec2-user@<ansible_controller_public_ip>:~/
+```
+Then run:
 ```bash
 ansible-playbook -i inventory.ini playbook.yml
 ```
