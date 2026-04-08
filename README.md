@@ -57,6 +57,8 @@ Install Ansible:
 ```bash
 sudo dnf install -y ansible
 ```
+<img width="1250" height="658" alt="Screenshot 2026-04-07 at 11 17 12 PM" src="https://github.com/user-attachments/assets/f95dfca2-1fe0-4336-b9fc-1051836add63" />
+
 
 Copy your SSH private key to the controller (from your local machine):
 
